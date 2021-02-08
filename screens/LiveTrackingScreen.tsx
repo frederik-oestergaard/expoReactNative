@@ -1,32 +1,55 @@
+import firebase from 'firebase';
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { View } from '../components/Themed';
 import TrackingMap from '../components/TrackingMap';
 
 export default function LiveTrackingScreen() {
-  const [markers, setMarkers] = useState([
+  const COLLECTION = "tracking";
+  const ORDER_ID = "9002"
+  useEffect(() => {
+    
+    const getGeoData = async () => {
+      await firebase
+        .firestore()
+        .collection(COLLECTION)
+        .doc(ORDER_ID)
+        .onSnapshot((doc) => {
+          if (doc) {
+            const data = doc.data();
+            const newLatitude = data?.geo?.latitude;
+            const newLongitude = data?.geo?.longitude;
+            const newExpectedArrival = new Date(data?.expectedArrival?.seconds* 1000 - new Date().getTimezoneOffset()*60000 ).toISOString()
+            
+            console.log("Coords: ",newLatitude, newLongitude);
+            setMarker({
+              latlng: {
+                latitude: newLatitude,
+                longitude: newLongitude,
+              },
+              title: "Your order",
+              description: `Expected arrival: ${newExpectedArrival }`,
+            })
+          }
+        });
+    };
+    getGeoData();
+  }, [])
+
+  const [marker, setMarker] = useState(
     {
       latlng: {
         latitude: 55.6760968,
         longitude: 12.5683371,
       },
-      title: "marker1",
-      description: "marker1 description...",
-    },
-    {
-      latlng: {
-        latitude: 56.6760968,
-        longitude: 9.5683371,
-      },
-      title: "marker2",
-      description: "marker2 description...",
-    },
-  ]);
+      title: "",
+      description: "...",
+    });
 
   return (
     <View style={styles.container}>
-      <TrackingMap markers={markers} />
+      <TrackingMap marker={marker} />
     </View>
   );
 }

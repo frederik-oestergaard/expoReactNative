@@ -1,33 +1,36 @@
 import * as React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Image } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Text, View } from '../components/Themed';
 
-interface IMarker {
-    latlng: {
+export interface TrackingMapProps {
+    marker: {latlng: {
         latitude: number,
         longitude: number,
       },
       title: string,
       description: string,
+    }
 }
 
-interface ITrackingMapProps {
-    markers: IMarker[]
-}
-const TrackingMap: React.FC<ITrackingMapProps> = ({markers}) => {
+const TrackingMap: React.FC<TrackingMapProps> = ({marker}) => {
   return (
     <>
       <Text style={styles.title}>Live tracking!</Text>
       <MapView style={styles.map} >
-        {markers.map((marker, i) => (
+        
           <Marker
-          key={i}
           coordinate={marker.latlng}
           title={marker.title}
           description={marker.description}
-        />
-        ))}
+          >
+               <Image
+    source={require('../assets/images/player.png')}
+    style={{width: 26, height: 28}}
+    resizeMode="contain"
+  />
+          </Marker>
+        
       </MapView>
     </>
   );
