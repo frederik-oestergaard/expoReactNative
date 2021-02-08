@@ -16,6 +16,11 @@ export default {
               TabTwoScreen: 'two',
             },
           },
+          Map: {
+            screens: {
+              TabOneScreen: 'three',
+            },
+          },
         },
       },
       NotFound: '*',
