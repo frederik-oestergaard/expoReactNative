@@ -24,7 +24,7 @@ export default function LiveTrackingScreen() {
             const newLongitude = data?.geo?.longitude;
             const newExpectedArrival = new Date(data?.expectedArrival?.seconds* 1000 - new Date().getTimezoneOffset()*60000 ).toISOString()
             
-            console.log("Coords: ",newLatitude, newLongitude);
+            console.log("New coords: ",newLatitude, newLongitude);
             setCourier({
               latlng: {
                 latitude: newLatitude,

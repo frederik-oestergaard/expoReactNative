@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect, useRef } from "react";
 import { Image, Platform, StyleSheet } from "react-native";
-import MapView, { AnimatedRegion, MarkerAnimated } from "react-native-maps";
+import MapView, { AnimatedRegion, MapViewAnimated, MarkerAnimated } from "react-native-maps";
 import { Text } from "../components/Themed";
 
 export interface IMarker {
@@ -19,6 +19,7 @@ export interface TrackingMapProps {
 
 const TrackingMap: React.FC<TrackingMapProps> = ({ courier }) => {
 
+  // Animate the movement of the courier position
   const animatedRegion = useRef<AnimatedRegion>(new AnimatedRegion({
     latitude: courier.latlng.latitude,
     longitude: courier.latlng.longitude,
@@ -26,29 +27,23 @@ const TrackingMap: React.FC<TrackingMapProps> = ({ courier }) => {
     longitudeDelta: 0.04,
   }));
   const marker = useRef<MarkerAnimated>(null);
-
   useEffect(() => {
-     const duration = 500
-      const nextCoordinate = new AnimatedRegion({
-        latitude: courier.latlng.latitude,
-        longitude: courier.latlng.longitude,
-        latitudeDelta: 0.04, 
-        longitudeDelta: 0.04,
-      });
+     const DURATION = 800
 
-      if (animatedRegion.current !== nextCoordinate) {
+      if (Number(animatedRegion.current.latitude) !== courier.latlng.latitude) {
         if (Platform.OS === 'android') {
           if (marker.current) {
             marker.current.animateMarkerToCoordinate(
               courier.latlng,
-              duration
-            );
-          }
-        } else {
+              DURATION
+              );
+            }
+          } else {
           animatedRegion.current.timing({
             useNativeDriver: false,
-            ...courier,
-            duration
+            latitude: courier.latlng.latitude,
+            longitude: courier.latlng.longitude,
+            duration: DURATION
           }).start();
         }
       }
@@ -57,7 +52,7 @@ const TrackingMap: React.FC<TrackingMapProps> = ({ courier }) => {
 
   return (
     <>
-      <Text style={styles.title}>Live tracking!</Text>
+      <Text style={styles.title}>Live tracking</Text>
       <MapView
         style={styles.map}
         initialRegion={{
@@ -68,14 +63,14 @@ const TrackingMap: React.FC<TrackingMapProps> = ({ courier }) => {
         }}
       >
         <MarkerAnimated
-          coordinate={courier.latlng}
+          coordinate={animatedRegion.current}
           title={courier.title}
           description={courier.description}
           ref={marker}
         >
           <Image
-            source={require("../assets/images/player.png")}
-            style={{ width: 26, height: 26 }}
+            source={require("../assets/images/delivery_icon.png")}
+            style={{ width: 36, height: 36 }}
             resizeMode="contain"
           />
         </MarkerAnimated>
