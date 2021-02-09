@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import firebase from 'firebase';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
@@ -22,7 +23,9 @@ export default function LiveTrackingScreen() {
             const data = doc.data();
             const newLatitude = data?.geo?.latitude;
             const newLongitude = data?.geo?.longitude;
-            const newExpectedArrival = new Date(data?.expectedArrival?.seconds* 1000 - new Date().getTimezoneOffset()*60000 ).toISOString()
+            const date = new Date(data?.expectedArrival?.seconds* 1000);
+            const formattedDate = format(date, "MMMM do, yyyy H:mma");
+            const newExpectedArrival = formattedDate;
             
             console.log("New coords: ",newLatitude, newLongitude);
             setCourier({

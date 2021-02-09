@@ -44,7 +44,7 @@ export default () => {
     return (
       <App>
         <SafeAreaProvider>
-          <StatusBar hidden />
+          <StatusBar />
         </SafeAreaProvider>
       </App>
     );
