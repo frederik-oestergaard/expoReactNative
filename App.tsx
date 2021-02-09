@@ -4,8 +4,18 @@ import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import useCachedResources from './hooks/useCachedResources';
-import useColorScheme from './hooks/useColorScheme';
-import Navigation from './navigation';
+import { createAppContainer } from 'react-navigation'
+import { createStackNavigator } from 'react-navigation-stack'
+import LiveTrackingScreen from './screens/LiveTrackingScreen';
+
+const navigator = createStackNavigator({
+  map: LiveTrackingScreen
+}, {
+  initialRouteName: 'map',
+  defaultNavigationOptions: {
+    title: 'Order Location Tracking'
+  }
+});
 
 var firebaseConfig = {
   apiKey: "AIzaSyCjWvauKhB-7i36JvK-roJ3WckHtoH9SGs",
@@ -22,18 +32,22 @@ if (!firebase.apps.length) {
   firebase.app(); // if already initialized, use that one
 };
 
-export default function App() {
+
+const App = createAppContainer(navigator);
+
+export default () => {
   const isLoadingComplete = useCachedResources();
-  const colorScheme = useColorScheme();
 
   if (!isLoadingComplete) {
     return null;
   } else {
     return (
-      <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} />
-        <StatusBar />
-      </SafeAreaProvider>
+      <App>
+        <SafeAreaProvider>
+          <StatusBar hidden />
+        </SafeAreaProvider>
+      </App>
     );
+
   }
-}
+};
