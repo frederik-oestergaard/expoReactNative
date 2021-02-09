@@ -1,43 +1,24 @@
-import { LOCATION } from 'expo-permissions';
-import { usePermissions } from 'expo-permissions/build/PermissionsHooks';
 import firebase from 'firebase';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { View } from '../components/Themed';
 import TrackingMap from '../components/TrackingMap';
-import * as Location from 'expo-location';
 
 export default function LiveTrackingScreen() {
-  // Request permissions to use the users location
-  const [permission, askPermission, getPermission] = usePermissions(LOCATION, { ask: true });
-
-  useEffect(() => {
-    (async () => {
-
-      let location = await Location.getCurrentPositionAsync({});
-      console.log(location);
-      setYourLocation({latlng: {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude
-      },
-      description: "",
-      title: "Your order"
-    })
-    })();
-  }, []);
-
   // Subscribe to database tracking data
   useEffect(() => {
+    let unmounted = false;
     const COLLECTION = "tracking";
     const ORDER_ID = "9003"
-    const getGeoData = async () => {
-      await firebase
+    const getGeoData = () => {
+
+      firebase
         .firestore()
         .collection(COLLECTION)
         .doc(ORDER_ID)
         .onSnapshot((doc) => {
-          if (doc) {
+          if (!unmounted && doc) {
             const data = doc.data();
             const newLatitude = data?.geo?.latitude;
             const newLongitude = data?.geo?.longitude;
@@ -56,6 +37,7 @@ export default function LiveTrackingScreen() {
         });
     };
     getGeoData();
+    return () => {unmounted = true}
   }, [])
 
   const [courier, setCourier] = useState(
@@ -67,19 +49,10 @@ export default function LiveTrackingScreen() {
       title: "",
       description: "...",
     });
-  const [yourLocation, setYourLocation] = useState(
-    {
-      latlng: {
-        latitude: 55,
-        longitude: 12,
-      },
-      title: "Your location",
-      description: "",
-    });
 
   return (
     <View style={styles.container}>
-      <TrackingMap courier={courier} yourLocation={yourLocation} />
+      <TrackingMap courier={courier} />
     </View>
   );
 }

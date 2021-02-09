@@ -1,7 +1,8 @@
 import * as React from "react";
-import { StyleSheet, Image } from "react-native";
-import MapView, { Marker } from "react-native-maps";
-import { Text, View } from "../components/Themed";
+import { useEffect, useRef } from "react";
+import { Image, Platform, StyleSheet } from "react-native";
+import MapView, { AnimatedRegion, MarkerAnimated } from "react-native-maps";
+import { Text } from "../components/Themed";
 
 export interface IMarker {
   latlng: {
@@ -13,50 +14,71 @@ export interface IMarker {
 }
 
 export interface TrackingMapProps {
-  yourLocation: IMarker;
   courier: IMarker;
 }
 
-const TrackingMap: React.FC<TrackingMapProps> = ({ courier, yourLocation }) => {
-  function getRegion(pos1: IMarker, pos2: IMarker) {
-    const midPointLat = (pos1.latlng.latitude + pos2.latlng.latitude) / 2;
-    const midPointLong = (pos1.latlng.longitude + pos2.latlng.longitude) / 2;
-    return {
-      latitude: midPointLat,
-      longitude: midPointLong,
-      latitudeDelta:
-        Math.abs(pos1.latlng.latitude - pos2.latlng.latitude) * 1.5,
-      longitudeDelta:
-        Math.abs(pos1.latlng.longitude - pos2.latlng.longitude) * 1.5,
-    };
-  }
+const TrackingMap: React.FC<TrackingMapProps> = ({ courier }) => {
+
+  const animatedRegion = useRef<AnimatedRegion>(new AnimatedRegion({
+    latitude: courier.latlng.latitude,
+    longitude: courier.latlng.longitude,
+    latitudeDelta: 0.04,
+    longitudeDelta: 0.04,
+  }));
+  const marker = useRef<MarkerAnimated>(null);
+
+  useEffect(() => {
+     const duration = 500
+      const nextCoordinate = new AnimatedRegion({
+        latitude: courier.latlng.latitude,
+        longitude: courier.latlng.longitude,
+        latitudeDelta: 0.04, 
+        longitudeDelta: 0.04,
+      });
+
+      if (animatedRegion.current !== nextCoordinate) {
+        if (Platform.OS === 'android') {
+          if (marker.current) {
+            marker.current.animateMarkerToCoordinate(
+              courier.latlng,
+              duration
+            );
+          }
+        } else {
+          animatedRegion.current.timing({
+            useNativeDriver: false,
+            ...courier,
+            duration
+          }).start();
+        }
+      }
+
+  }, [courier.latlng]);
 
   return (
     <>
       <Text style={styles.title}>Live tracking!</Text>
-      <MapView style={styles.map} region={getRegion(courier, yourLocation)}>
-        <Marker
-          coordinate={yourLocation.latlng}
-          title={"Your location"}
-          description={yourLocation.description}
-        >
-          <Image
-            source={require("../assets/images/house.png")}
-            style={{ width: 26, height: 26 }}
-            resizeMode="contain"
-          />
-        </Marker>
-        <Marker
+      <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: courier.latlng.latitude,
+          longitude: courier.latlng.longitude,
+          latitudeDelta: 0.04,
+          longitudeDelta: 0.04,
+        }}
+      >
+        <MarkerAnimated
           coordinate={courier.latlng}
           title={courier.title}
           description={courier.description}
+          ref={marker}
         >
           <Image
             source={require("../assets/images/player.png")}
             style={{ width: 26, height: 26 }}
             resizeMode="contain"
           />
-        </Marker>
+        </MarkerAnimated>
       </MapView>
     </>
   );
@@ -73,7 +95,7 @@ const styles = StyleSheet.create({
   },
   map: {
     width: "100%",
-    height: "50%",
+    height: "90%",
   },
 });
 
