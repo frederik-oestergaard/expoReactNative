@@ -7,13 +7,16 @@ import { View } from '../components/Themed';
 import TrackingMap from '../components/TrackingMap';
 
 export default function LiveTrackingScreen() {
-  // Subscribe to database tracking data
-  useEffect(() => {
-    let unmounted = false;
+  const [courierPosition, setCourierPosition] = useState(
+    {
+        latitude: 0,
+        longitude: 0,
+    });
+    const [expectedArrivalTime, setExpectedArrivalTime] = useState<string | null>(null);
     const COLLECTION = "tracking";
     const ORDER_ID = "9003"
+    let unmounted = false;
     const getGeoData = () => {
-
       firebase
         .firestore()
         .collection(COLLECTION)
@@ -26,36 +29,25 @@ export default function LiveTrackingScreen() {
             const date = new Date(data?.expectedArrival?.seconds* 1000);
             const formattedDate = format(date, "MMMM do, yyyy H:mma");
             const newExpectedArrival = formattedDate;
-            
             console.log("New coords: ",newLatitude, newLongitude);
-            setCourier({
-              latlng: {
+            setExpectedArrivalTime(newExpectedArrival);
+            setCourierPosition({
                 latitude: newLatitude,
                 longitude: newLongitude,
-              },
-              title: "Your order",
-              description: `Expected arrival: ${newExpectedArrival }`,
             })
           }
         });
     };
+  // Subscribe to database tracking data
+  useEffect(() => {
     getGeoData();
     return () => {unmounted = true}
   }, [])
 
-  const [courier, setCourier] = useState(
-    {
-      latlng: {
-        latitude: 55.6760968,
-        longitude: 12.5683371,
-      },
-      title: "",
-      description: "...",
-    });
 
   return (
     <View style={styles.container}>
-      <TrackingMap courier={courier} />
+      <TrackingMap courierPosition={courierPosition} expectedArrivalTime={expectedArrivalTime} />
     </View>
   );
 }
