@@ -44,6 +44,12 @@ const TrackingMap: React.FC<TrackingMapProps> = ({ courierPosition, expectedArri
 
   }, [courierPosition]);
 
+  if (!courierPosition.latitude && !courierPosition.longitude) {
+    return <>
+    <Text style={styles.title} >Your Order Location</Text>
+    <Text style={styles.subTitle}>{`You order tracking will show here, once the driver is on his way to your location`}</Text>
+    </>
+  }
   return (
     <>
       <Text style={styles.title} >Your Order Location</Text>
