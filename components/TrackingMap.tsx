@@ -22,32 +22,23 @@ const TrackingMap: React.FC<TrackingMapProps> = ({ courierPosition, expectedArri
   }));
   const marker = useRef<MarkerAnimated>(null);
   useEffect(() => {
-     const DURATION = 800
+    const DURATION = 800
 
-      if (Number(animatedRegion.current.latitude) !== courierPosition.latitude) {
-        if (Platform.OS === 'android') {
-          if (marker.current) {
-            marker.current.animateMarkerToCoordinate(
-              courierPosition,
-              DURATION
-              );
-            }
-          } else {
-          animatedRegion.current.timing({
-            useNativeDriver: false,
-            latitude: courierPosition.latitude,
-            longitude: courierPosition.longitude,
-            duration: DURATION
-          }).start();
-        }
-      }
+    if (Number(animatedRegion.current.latitude) !== courierPosition.latitude) {
+      animatedRegion.current.timing({
+        useNativeDriver: false,
+        latitude: courierPosition.latitude,
+        longitude: courierPosition.longitude,
+        duration: DURATION
+      }).start();
+    }
 
   }, [courierPosition]);
 
   if (!courierPosition.latitude && !courierPosition.longitude) {
     return <>
-    <Text style={styles.title} >Your Order Location</Text>
-    <Text style={styles.subTitle}>{`You order tracking will show here, once the driver is on his way to your location`}</Text>
+      <Text style={styles.title} >Your Order Location</Text>
+      <Text style={styles.subTitle}>{`You order tracking will show here, once the driver is on his way to your location`}</Text>
     </>
   }
   return (
@@ -66,7 +57,7 @@ const TrackingMap: React.FC<TrackingMapProps> = ({ courierPosition, expectedArri
         <MarkerAnimated
           coordinate={animatedRegion.current}
           title="Your order"
-          description={"Expected arrival: "+expectedArrivalTime}
+          description={"Expected arrival: " + expectedArrivalTime}
           ref={marker}
         >
           <Image
